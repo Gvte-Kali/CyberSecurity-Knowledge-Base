@@ -3,49 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CheatSheets — CyberSecurity Knowledge Base</title>
+<title>CyberSecurity Knowledge Base</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:monospace;background:#0d0f12;color:#e0e0e0;min-height:100vh;display:flex;flex-direction:column}
 a{text-decoration:none;color:inherit}
 
-header{padding:32px 40px 20px;border-bottom:1px solid #1e2229}
-.breadcrumb{font-size:10px;color:#444;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
-.breadcrumb a{color:#4ade80}
-.breadcrumb a:hover{text-decoration:underline}
-header h1{font-size:22px;font-weight:bold;color:#fff}
-header p{font-size:12px;color:#555;margin-top:5px}
+header{padding:40px 40px 24px;border-bottom:1px solid #1e2229}
+.logo{font-size:11px;color:#4ade80;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px}
+header h1{font-size:26px;font-weight:bold;color:#fff;letter-spacing:-0.01em}
+header p{font-size:12px;color:#555;margin-top:6px}
 
 main{flex:1;padding:40px}
-.section{margin-bottom:48px}
-.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #1e2229}
-.section-icon{font-size:16px;width:32px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.icon-attack{background:#2e1a1a;border:1px solid #5a2a2a}
-.icon-defense{background:#1a2e1a;border:1px solid #2a4a2a}
-.section-title{font-size:15px;font-weight:bold;color:#fff}
-.section-count{font-size:10px;color:#444;margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;max-width:960px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{border:1px solid #1e2229;border-radius:8px;padding:24px;background:#13161b;transition:border-color 0.15s,background 0.15s;cursor:pointer;display:flex;flex-direction:column;gap:12px}
+.card:hover{border-color:#4ade80;background:#161a1f}
+.card.coming-soon{cursor:default;opacity:0.45}
+.card.coming-soon:hover{border-color:#1e2229;background:#13161b}
 
-.card{border:1px solid #1e2229;border-radius:7px;padding:18px;background:#13161b;transition:border-color 0.15s,background 0.15s;display:flex;flex-direction:column;gap:8px}
-.card.active{cursor:pointer}
-.card.active:hover{background:#161a1f}
-.card.coming-soon{opacity:0.4;cursor:default}
-
-.card-top{display:flex;align-items:center;gap:10px}
-.card-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.dot-attack{background:#f87171}
-.dot-defense{background:#4ade80}
-.dot-soon{background:#333}
-.card-title{font-size:12px;font-weight:bold;color:#fff}
-.card-desc{font-size:10px;color:#555;line-height:1.6}
-.card-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.07em;font-weight:bold;align-self:flex-start;margin-top:2px}
-.badge-live-attack{background:#2e1a1a;color:#f87171;border:1px solid #5a2a2a}
-.badge-live-defense{background:#1a2e1a;color:#4ade80;border:1px solid #2a4a2a}
-.badge-soon{background:#1e2229;color:#333;border:1px solid #252a32}
-
-.card.active.attack:hover{border-color:#f87171}
-.card.active.defense:hover{border-color:#4ade80}
+.card-icon{font-size:22px;width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:#1a1e25;border:1px solid #1e2229;flex-shrink:0}
+.card-title{font-size:14px;font-weight:bold;color:#fff}
+.card-desc{font-size:11px;color:#555;line-height:1.6}
+.card-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.08em;font-weight:bold;align-self:flex-start}
+.badge-live{background:#1a2e1a;color:#4ade80;border:1px solid #2a4a2a}
+.badge-soon{background:#1e2229;color:#444;border:1px solid #252a32}
 
 footer{padding:20px 40px;border-top:1px solid #1e2229;font-size:10px;color:#333;letter-spacing:0.05em}
 </style>
@@ -53,127 +35,69 @@ footer{padding:20px 40px;border-top:1px solid #1e2229;font-size:10px;color:#333;
 <body>
 
 <header>
-  <div class="breadcrumb"><a href="../index.html">Home</a> &rsaquo; CheatSheets</div>
-  <h1>CheatSheets</h1>
-  <p>Attack and defense references — click a card to open the cheatsheet</p>
+  <div class="logo">// CyberSecurity Knowledge Base</div>
+  <h1>Knowledge Base</h1>
+  <p>Pentest resources, cheatsheets, and attack/defense references</p>
 </header>
 
 <main>
+  <div class="grid">
 
-  <!-- ATTACK -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-icon icon-attack">&#9888;</div>
-      <div class="section-title">Attack</div>
-      <div class="section-count">2 available</div>
+    <a href="CheatSheets/index.html" class="card">
+      <div class="card-icon">&#128196;</div>
+      <div>
+        <div class="card-title">CheatSheets</div>
+        <div class="card-desc">Attack and defense cheatsheets — web, network, AD, crypto, forensics and more.</div>
+      </div>
+      <span class="card-badge badge-live">Live</span>
+    </a>
+
+    <div class="card coming-soon">
+      <div class="card-icon">&#127959;</div>
+      <div>
+        <div class="card-title">Methodology</div>
+        <div class="card-desc">Step-by-step pentest methodologies for web, AD, mobile and infrastructure targets.</div>
+      </div>
+      <span class="card-badge badge-soon">Coming soon</span>
     </div>
-    <div class="grid">
 
-      <a href="Attack/Web_Attack.html" class="card active attack">
-        <div class="card-top">
-          <div class="card-dot dot-attack"></div>
-          <div class="card-title">Web Attacks</div>
-        </div>
-        <div class="card-desc">CTF web pentest checklist — recon, injection, auth bypass, file upload, post-exploitation and more.</div>
-        <span class="card-badge badge-live-attack">Live</span>
-      </a>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Active Directory</div>
-        </div>
-        <div class="card-desc">Kerberoasting, AS-REP roasting, Pass-the-Hash, DCSync, ADCS abuse.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
+    <div class="card coming-soon">
+      <div class="card-icon">&#128295;</div>
+      <div>
+        <div class="card-title">Tools</div>
+        <div class="card-desc">Curated tool references, usage examples, and Exegol environment setup guides.</div>
       </div>
-
-      <a href="Attack/Network_Attack.html" class="card active attack">
-        <div class="card-top">
-          <div class="card-dot dot-attack"></div>
-          <div class="card-title">Network Attacks</div>
-        </div>
-        <div class="card-desc">SMB, FTP, SSH, DNS, SNMP, LDAP, RDP, pivoting, MITM and post-exploitation.</div>
-        <span class="card-badge badge-live-attack">Live</span>
-      </a>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Reverse Engineering</div>
-        </div>
-        <div class="card-desc">Binary analysis, patching, decompilation, anti-debug bypass.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Mobile</div>
-        </div>
-        <div class="card-desc">Android/iOS app pentesting, APK analysis, traffic interception.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Cloud</div>
-        </div>
-        <div class="card-desc">AWS, Azure, GCP misconfigurations, IAM privilege escalation.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
+      <span class="card-badge badge-soon">Coming soon</span>
     </div>
+
+    <div class="card coming-soon">
+      <div class="card-icon">&#127988;</div>
+      <div>
+        <div class="card-title">CTF Writeups</div>
+        <div class="card-desc">Documented CTF solutions with annotated exploitation paths and lessons learned.</div>
+      </div>
+      <span class="card-badge badge-soon">Coming soon</span>
+    </div>
+
+    <div class="card coming-soon">
+      <div class="card-icon">&#128274;</div>
+      <div>
+        <div class="card-title">Cryptography</div>
+        <div class="card-desc">Common crypto attacks, encoding tricks, hash identification and cracking references.</div>
+      </div>
+      <span class="card-badge badge-soon">Coming soon</span>
+    </div>
+
+    <div class="card coming-soon">
+      <div class="card-icon">&#128269;</div>
+      <div>
+        <div class="card-title">Forensics & OSINT</div>
+        <div class="card-desc">File analysis, memory forensics, steganography, and OSINT investigation techniques.</div>
+      </div>
+      <span class="card-badge badge-soon">Coming soon</span>
+    </div>
+
   </div>
-
-  <!-- DEFENSE -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-icon icon-defense">&#128737;</div>
-      <div class="section-title">Defense</div>
-      <div class="section-count">Coming soon</div>
-    </div>
-    <div class="grid">
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Blue Team Basics</div>
-        </div>
-        <div class="card-desc">Log analysis, alert triage, IOC identification and response playbooks.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">SIEM & Detection</div>
-        </div>
-        <div class="card-desc">Splunk, Elastic, Wazuh queries and detection rule writing.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Hardening</div>
-        </div>
-        <div class="card-desc">Linux, Windows, and web server hardening checklists.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-      <div class="card coming-soon">
-        <div class="card-top">
-          <div class="card-dot dot-soon"></div>
-          <div class="card-title">Incident Response</div>
-        </div>
-        <div class="card-desc">IR playbooks, containment steps, forensic artifact collection.</div>
-        <span class="card-badge badge-soon">Coming soon</span>
-      </div>
-
-    </div>
-  </div>
-
 </main>
 
 <footer>// gvte &mdash; cybersecurity knowledge base</footer>
